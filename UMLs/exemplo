@@ -1,0 +1,29 @@
+@startuml
+left to right direction
+
+actor Aluno
+actor Bibliotecário
+rectangle "Sistema de Biblioteca" {
+
+  Aluno --> (Buscar Livro)
+  Bibliotecário --> (Emprestar Livro)
+  Aluno --> (Devolver Livro)
+  Bibliotecário --> (Reservar Livro)
+  
+    
+    (Devolver Livro) --> (Verificar prazo) : <<include>>
+    (Exibir erro) ..> (Devolver Livro) : <<extend>>
+    (Verificar prazo) --> (Acessar Sistema) : sucesso
+    (Verificar prazo) --> (Exibir Erro) : falha
+    (Buscar Livro) --> (Fazer busca)
+    (Fazer busca) --> (Livro existe) : sucesso
+    (Exibir Lista) ..> (Livro existe)
+    (Emprestar Livro) --> (Verificar Livro no Acervo)
+    (Verificar Livro no Acervo) --> (Livro está no acervo)
+    (Verificar Livro no Acervo) ..> (Livro não está no acervo)
+    (Livro está no acervo) --> (Dar o livro emprestado)
+    (Livro não está no acervo) ..> (Relatar o aluno que o livro não está disponível)
+    
+}
+
+@enduml

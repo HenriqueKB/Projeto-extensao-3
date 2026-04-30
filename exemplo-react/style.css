@@ -1,0 +1,57 @@
+body {
+    background-color: #272B33;
+    color: #F5F5F5;
+    font-family: sans-serif;
+}
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+.card {
+    background-color: #3C3E44;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 280px;
+    cursor: pointer; 
+    transition: transform 0.2s ease; 
+}
+.card:hover {
+    transform: scale(1.05);
+}
+.card img {
+    width: 100%;
+}
+.card-info {
+    padding: 15px;
+}
+.navegacao {
+    text-align: center;
+    margin: 20px 0;
+}
+.search-container {
+    text-align: center;
+    margin: 20px 0;
+}
+#busca {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    width: 300px;
+}
+.btn-nav {
+    background-color: #1800a385;
+    color: #F5F5F5;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 10px;
+}
+.btn-nav:hover {
+    background-color: #0048ff;
+}
+#pagina-atual {
+    color: #ffffff;
+}

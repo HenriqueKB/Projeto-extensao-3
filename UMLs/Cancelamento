@@ -1,0 +1,21 @@
+@startuml
+left to right direction
+
+actor Paciente
+actor Psico
+
+rectangle "Cancelar Consulta" {
+
+  Paciente --> (Cancelar consulta)
+  Psico --> (Ver agenda)
+
+   
+    (Cancelar consulta) --> (Falar com a Psico)
+    (Falar com a Psico) --> Psico
+    (Mostrar  horários para a Psico) ..> (Ver agenda) : Averiguar horários 
+    (Ver agenda) --> (Cancelar Horário) : ver se o cliente não está cancelando em cima da hora e confirmar
+    (Cancelar Horário) ..> (Cancelar em cima da hora) 
+    (Cancelar Horário) --> (Cancelado com sucesso) 
+    (Cancelar em cima da hora) ..> (Cobrar multa e reagendar) : Relatar o paciente que está em cima da hora
+}
+@enduml

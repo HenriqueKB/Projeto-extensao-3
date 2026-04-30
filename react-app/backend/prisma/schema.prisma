@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ConsultationType {
+  psicoterapia
+  avaliacao
+  preco_antigo
+}
+
+enum AppointmentStatus {
+  agendada
+  confirmada
+  presente
+  falta
+  cancelada
+  remarcada
+}
+
+enum PaymentMethod {
+  dinheiro
+  cartao
+  pix
+}
+
+enum PaymentStatus {
+  pendente
+  pago
+  estornado
+}
+
+model Patient {
+  id             String         @id @default(cuid())
+  name           String
+  phone          String
+  email          String?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  appointments   Appointment[]
+  clinicalNotes  ClinicalNote[]
+  contracts      DigitalContract[]
+}
+
+model Appointment {
+  id                    String            @id @default(cuid())
+  patientId             String
+  patient               Patient           @relation(fields: [patientId], references: [id])
+  consultationType      ConsultationType
+  price                 Decimal           @db.Decimal(10, 2)
+  startsAt              DateTime
+  endsAt                DateTime
+  durationMinutes       Int
+  status                AppointmentStatus @default(agendada)
+  summary               String?
+  chargeFirstDeposit    Boolean           @default(false)
+  recurringWeekly       Boolean           @default(false)
+  googleEventId         String?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  payments              Payment[]
+  clinicalNotes         ClinicalNote[]
+
+  @@index([startsAt])
+  @@index([status])
+}
+
+model ClinicalNote {
+  id             String      @id @default(cuid())
+  patientId      String
+  appointmentId  String?
+  patient        Patient     @relation(fields: [patientId], references: [id])
+  appointment    Appointment? @relation(fields: [appointmentId], references: [id])
+  content        String
+  authorUserId   String
+  createdAt      DateTime    @default(now())
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  appointmentId    String
+  appointment      Appointment   @relation(fields: [appointmentId], references: [id])
+  amount           Decimal       @db.Decimal(10, 2)
+  method           PaymentMethod
+  status           PaymentStatus @default(pendente)
+  isDeposit        Boolean       @default(false)
+  isCancellationFee Boolean      @default(false)
+  dueAt            DateTime?
+  paidAt           DateTime?
+  createdAt        DateTime      @default(now())
+}
+
+model AvailabilitySlot {
+  id             String   @id @default(cuid())
+  startsAt       DateTime
+  endsAt         DateTime
+  isBlocked      Boolean  @default(false)
+  blockReason    String?
+  createdAt      DateTime @default(now())
+}
+
+model InventoryItem {
+  id               String   @id @default(cuid())
+  name             String
+  quantity         Int
+  minQuantityAlert Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model DigitalContract {
+  id              String   @id @default(cuid())
+  patientId       String
+  patient         Patient  @relation(fields: [patientId], references: [id])
+  provider        String
+  externalDocId   String?
+  status          String
+  signedAt        DateTime?
+  createdAt       DateTime @default(now())
+}

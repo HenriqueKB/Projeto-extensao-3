@@ -1,0 +1,23 @@
+@startuml
+left to right direction
+
+actor Paciente
+actor Psico
+
+rectangle "Agendar Consulta" {
+
+  Paciente --> (Agendar consulta)
+  Psico --> (Ver agenda)
+
+   
+    (Agendar consulta) --> (Falar com a Psico)
+    (Falar com a Psico) --> Psico
+    (Mostrar  horários para a Psico) ..> (Ver agenda) : Averiguar horários 
+    (Ver agenda) --> (Verificar Horário Livre)
+    (Verificar Horário Livre) --> (Horário Livre) : informar cliente
+    (Verificar Horário Livre) ..> (Horário Ocupado) 
+    (Horário Livre) --> (Agendar Consulta) 
+    (Horário Ocupado) ..> (Relatar o paciente que o horário não tá livre)
+    (Relatar o paciente que o horário não tá livre) ..> (Mostrar horários livres para o cliente)
+}
+@enduml
