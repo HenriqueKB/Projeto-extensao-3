@@ -7,4 +7,5 @@
 - Ainda precisamos de back-end
 - Ainda precisamos terminar o frontend
 - Ainda precisamos ter prints deste software rodando
-- 
+- Ainda precisamos das funcionalidades implementadas, ou seja, agendamento, prontuários e financeiro ainda não estão de fato funcionando.
+- Fazer isso rodar.
