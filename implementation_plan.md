@@ -1,5 +1,71 @@
 # Plano de Implementação: Login, Prontuário Evolutivo e Backup Básico 🚀
 
+> **Última atualização:** 27/05/2026 — commit `feat: login e backup básico`
+
+---
+
+## Relatório de Status
+
+| Funcionalidade | Status | Observação |
+|---|---|---|
+| 1. Sistema de Login | **Concluído** | Backend + frontend integrados |
+| 2. Prontuário Evolutivo | **Pendente** | Modelo `ClinicalNote` existe no schema; rotas e UI não implementados |
+| 3. Backup Básico | **Concluído** | Export offline + sync manual com R2 |
+
+### O que já foi implementado
+
+#### Login (100%)
+- `react-app/backend/src/auth.js` — hash SHA-256, token HMAC, middleware `requireAuth`
+- `react-app/backend/src/routes/auth.js` — `POST /auth/login`, `GET /auth/me`
+- `react-app/backend/src/app.js` — rotas protegidas; `/auth` e `/health` públicas
+- `react-app/backend/src/server.js` — seed automático do usuário `psicologa` / `senha123`
+- `react-app/src/components/Login.js` — tela de login com feedback de erro
+- `react-app/src/App.js` — controle de sessão, header com nome do usuário, botão Sair
+- `react-app/src/services/api.js` — token em `localStorage` (`psicoagenda_token`), funções `login` e `fetchCurrentUser`
+
+#### Backup básico (100%)
+- `react-app/backend/src/routes/backup.js` — `GET /backup/export`, `POST /backup/sync`
+- `react-app/backend/src/r2.js` — download/upload do SQLite no Cloudflare R2 (já existia)
+- `react-app/backend/src/prisma.js` — backup assíncrono automático após writes (já existia)
+- `react-app/src/App.js` — botões "Baixar Cópia do Banco" e "Sincronizar Cloud R2"
+- `react-app/src/services/api.js` — funções `exportBackup` e `syncR2Backup`
+
+#### Banco de dados (parcial — schema pronto)
+- Modelo `User` no `schema.prisma` — **usado pelo login**
+- Modelo `ClinicalNote` no `schema.prisma` — **criado, mas sem rotas nem UI**
+
+### O que ainda falta
+
+#### Prontuário Evolutivo — Backend
+- [ ] `GET /patients/:id/notes` — listar evoluções (ordem decrescente por data)
+- [ ] `POST /patients/:id/notes` — criar evolução (usar `req.authUser.id` como `authorUserId`)
+- [ ] `PUT /patients/:id/notes/:noteId` — editar evolução
+- [ ] `DELETE /patients/:id/notes/:noteId` — excluir evolução
+- [ ] Alterações em `react-app/backend/src/routes/patients.js`
+
+#### Prontuário Evolutivo — Frontend
+- [ ] Funções em `api.js`: `fetchClinicalNotes`, `createClinicalNote`, `updateClinicalNote`, `deleteClinicalNote`
+- [ ] Abas em `PatientList.js`: "Histórico de Consultas" | "Prontuário Evolutivo"
+- [ ] UI para criar, editar e excluir evoluções clínicas
+
+#### Melhorias opcionais (fora do escopo mínimo)
+- [ ] Tela/painel para alterar senha do usuário padrão
+- [ ] Feedback visual de sucesso após sync R2 (toast/mensagem verde)
+- [ ] Testes automatizados para auth e backup
+- [ ] Variável `AUTH_SECRET` documentada no README (hoje usa fallback de dev)
+
+### Como testar o que já funciona
+
+1. Subir backend: `cd react-app/backend && npm run dev`
+2. Subir frontend: `cd react-app && npm start`
+3. **Login:** abrir o site → tela de login → `psicologa` / `senha123`
+4. **Backup offline:** clicar "Baixar Cópia do Banco" → download de `backup_psicoagenda.db`
+5. **Sync R2:** clicar "Sincronizar Cloud R2" (requer `.env` com credenciais R2 configuradas)
+
+---
+
+## Escopo original
+
 Este plano detalha a implementação das três novas funcionalidades solicitadas para o projeto de extensão **PsicoAgenda**:
 1. **Sistema de Login Simples**: Controle de acesso básico com usuário único e sessão via localStorage.
 2. **Prontuário Evolutivo (Evoluções de Pacientes)**: Registro histórico das evoluções clínicas associadas a cada paciente.

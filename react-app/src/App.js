@@ -6,6 +6,7 @@ import MonthlyView from './components/MonthlyView';
 import AppointmentForm from './components/AppointmentForm';
 import EditAppointmentModal from './components/EditAppointmentModal';
 import PatientList from './components/PatientList';
+import Login from './components/Login';
 import { format } from 'date-fns';
 import {
   fetchPatients,
@@ -15,6 +16,10 @@ import {
   updateAppointmentById,
   deleteAppointmentById,
   fetchPatientHistoryById,
+  fetchCurrentUser,
+  exportBackup,
+  syncR2Backup,
+  TOKEN_KEY,
 } from './services/api';
 
 function App() {
@@ -26,6 +31,10 @@ function App() {
   const [errorMessage, setErrorMessage] = useState('');
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [historyByPatient, setHistoryByPatient] = useState({});
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isSyncingBackup, setIsSyncingBackup] = useState(false);
 
   const loadData = async () => {
     try {
@@ -45,8 +54,34 @@ function App() {
   };
 
   useEffect(() => {
-    loadData();
+    const verifyExistingSession = async () => {
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token) {
+        setAuthChecked(true);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const result = await fetchCurrentUser();
+        setCurrentUser(result.user);
+        setIsAuthenticated(true);
+      } catch (_error) {
+        localStorage.removeItem(TOKEN_KEY);
+      } finally {
+        setAuthChecked(true);
+      }
+    };
+
+    verifyExistingSession();
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return;
+    }
+    loadData();
+  }, [isAuthenticated]);
 
   const addAppointment = async (appointment) => {
     try {
@@ -126,6 +161,43 @@ function App() {
     }
   };
 
+  const handleLoginSuccess = ({ token, user }) => {
+    localStorage.setItem(TOKEN_KEY, token);
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    setErrorMessage('');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem(TOKEN_KEY);
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+    setAppointments([]);
+    setPatients([]);
+    setHistoryByPatient({});
+  };
+
+  const handleExportBackup = async () => {
+    try {
+      setErrorMessage('');
+      await exportBackup();
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
+  const handleSyncBackup = async () => {
+    try {
+      setErrorMessage('');
+      setIsSyncingBackup(true);
+      await syncR2Backup();
+    } catch (error) {
+      setErrorMessage(error.message);
+    } finally {
+      setIsSyncingBackup(false);
+    }
+  };
+
   const getAppointmentsForDate = (date) => {
     const dateStr = format(date, 'yyyy-MM-dd');
     return appointments
@@ -178,11 +250,23 @@ function App() {
     }
   };
 
+  if (!authChecked) {
+    return <div className="notice">Verificando sessao...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLoginSuccess={handleLoginSuccess} />;
+  }
+
   return (
     <div className="App">
       <header className="App-header">
         <h1>Agenda Psicológica</h1>
         <p>Sistema de Gerenciamento de Consultas</p>
+        <div className="header-user">
+          <span>Conectada: {currentUser?.name || currentUser?.username}</span>
+          <button className="btn btn-secondary" onClick={handleLogout}>Sair</button>
+        </div>
       </header>
 
       <div className="view-tabs">
@@ -212,6 +296,14 @@ function App() {
         {errorMessage && <div className="notice notice-error">{errorMessage}</div>}
         <section className="financial-panel">
           <h2>Resumo Financeiro (MVP)</h2>
+          <div className="backup-actions">
+            <button className="btn btn-secondary" onClick={handleExportBackup}>
+              Baixar Cópia do Banco (Offline)
+            </button>
+            <button className="btn btn-primary" onClick={handleSyncBackup} disabled={isSyncingBackup}>
+              {isSyncingBackup ? 'Sincronizando...' : 'Sincronizar Cloud R2'}
+            </button>
+          </div>
           <div className="metrics-grid">
             <div className="metric-card">
               <span>Receita prevista</span>
