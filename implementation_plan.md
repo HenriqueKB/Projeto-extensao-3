@@ -1,6 +1,6 @@
 # Plano de Implementação: Login, Prontuário Evolutivo e Backup Básico 🚀
 
-> **Última atualização:** 27/05/2026 — commit `feat: login e backup básico`
+> **Última atualização:** 27/05/2026 — melhorias de login/backup (senha + feedback R2)
 
 ---
 
@@ -16,19 +16,21 @@
 
 #### Login (100%)
 - `react-app/backend/src/auth.js` — hash SHA-256, token HMAC, middleware `requireAuth`
-- `react-app/backend/src/routes/auth.js` — `POST /auth/login`, `GET /auth/me`
+- `react-app/backend/src/routes/auth.js` — `POST /auth/login`, `GET /auth/me`, `PUT /auth/password`
 - `react-app/backend/src/app.js` — rotas protegidas; `/auth` e `/health` públicas
 - `react-app/backend/src/server.js` — seed automático do usuário `psicologa` / `senha123`
 - `react-app/src/components/Login.js` — tela de login com feedback de erro
-- `react-app/src/App.js` — controle de sessão, header com nome do usuário, botão Sair
-- `react-app/src/services/api.js` — token em `localStorage` (`psicoagenda_token`), funções `login` e `fetchCurrentUser`
+- `react-app/src/components/ChangePassword.js` — formulário para alterar senha (senha atual + nova + confirmação)
+- `react-app/src/App.js` — controle de sessão, header com nome do usuário, botões **Alterar senha** e **Sair**
+- `react-app/src/services/api.js` — token em `localStorage` (`psicoagenda_token`), funções `login`, `fetchCurrentUser`, `changePassword`
 
 #### Backup básico (100%)
 - `react-app/backend/src/routes/backup.js` — `GET /backup/export`, `POST /backup/sync`
 - `react-app/backend/src/r2.js` — download/upload do SQLite no Cloudflare R2 (já existia)
 - `react-app/backend/src/prisma.js` — backup assíncrono automático após writes (já existia)
-- `react-app/src/App.js` — botões "Baixar Cópia do Banco" e "Sincronizar Cloud R2"
+- `react-app/src/App.js` — botões "Baixar Cópia do Banco" e "Sincronizar Cloud R2"; mensagem verde de sucesso após sync
 - `react-app/src/services/api.js` — funções `exportBackup` e `syncR2Backup`
+- `react-app/src/App.css` — classe `.notice-success` para feedback visual de sucesso
 
 #### Banco de dados (parcial — schema pronto)
 - Modelo `User` no `schema.prisma` — **usado pelo login**
@@ -49,18 +51,29 @@
 - [ ] UI para criar, editar e excluir evoluções clínicas
 
 #### Melhorias opcionais (fora do escopo mínimo)
-- [ ] Tela/painel para alterar senha do usuário padrão
-- [ ] Feedback visual de sucesso após sync R2 (toast/mensagem verde)
+- [x] Tela/painel para alterar senha do usuário padrão
+- [x] Feedback visual de sucesso após sync R2 (mensagem verde por 5 segundos)
 - [ ] Testes automatizados para auth e backup
-- [ ] Variável `AUTH_SECRET` documentada no README (hoje usa fallback de dev)
+- [x] Variável `AUTH_SECRET` documentada abaixo (fallback de dev se ausente)
+
+### Configuração — `AUTH_SECRET`
+
+No arquivo `react-app/backend/.env`, defina uma chave secreta para assinar os tokens de sessão:
+
+```env
+AUTH_SECRET=sua-chave-secreta-longa-e-aleatoria
+```
+
+Se `AUTH_SECRET` não estiver definida, o backend usa um valor padrão apenas para desenvolvimento local (`psicoagenda-dev-secret`). **Em produção, sempre configure `AUTH_SECRET`.**
 
 ### Como testar o que já funciona
 
 1. Subir backend: `cd react-app/backend && npm run dev`
 2. Subir frontend: `cd react-app && npm start`
 3. **Login:** abrir o site → tela de login → `psicologa` / `senha123`
-4. **Backup offline:** clicar "Baixar Cópia do Banco" → download de `backup_psicoagenda.db`
-5. **Sync R2:** clicar "Sincronizar Cloud R2" (requer `.env` com credenciais R2 configuradas)
+4. **Alterar senha:** no header, clicar **Alterar senha** → preencher senha atual, nova senha e confirmação → **Salvar nova senha** (mensagem verde de sucesso)
+5. **Backup offline:** clicar "Baixar Cópia do Banco" → download de `backup_psicoagenda.db`
+6. **Sync R2:** clicar "Sincronizar Cloud R2" → mensagem verde "Sincronizacao com R2 concluida com sucesso." (requer `.env` com credenciais R2)
 
 ---
 

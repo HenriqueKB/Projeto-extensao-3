@@ -7,6 +7,7 @@ import AppointmentForm from './components/AppointmentForm';
 import EditAppointmentModal from './components/EditAppointmentModal';
 import PatientList from './components/PatientList';
 import Login from './components/Login';
+import ChangePassword from './components/ChangePassword';
 import { format } from 'date-fns';
 import {
   fetchPatients,
@@ -35,11 +36,20 @@ function App() {
   const [authChecked, setAuthChecked] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isSyncingBackup, setIsSyncingBackup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showChangePassword, setShowChangePassword] = useState(false);
+
+  const showSuccess = (message) => {
+    setSuccessMessage(message);
+    setErrorMessage('');
+    window.setTimeout(() => setSuccessMessage(''), 5000);
+  };
 
   const loadData = async () => {
     try {
       setIsLoading(true);
       setErrorMessage('');
+      setSuccessMessage('');
       const [patientsData, appointmentsData] = await Promise.all([
         fetchPatients(),
         fetchAppointments(),
@@ -189,13 +199,20 @@ function App() {
   const handleSyncBackup = async () => {
     try {
       setErrorMessage('');
+      setSuccessMessage('');
       setIsSyncingBackup(true);
-      await syncR2Backup();
+      const result = await syncR2Backup();
+      showSuccess(result.message || 'Sincronizacao com R2 concluida com sucesso.');
     } catch (error) {
       setErrorMessage(error.message);
     } finally {
       setIsSyncingBackup(false);
     }
+  };
+
+  const handlePasswordChanged = (message) => {
+    setShowChangePassword(false);
+    showSuccess(message);
   };
 
   const getAppointmentsForDate = (date) => {
@@ -265,6 +282,13 @@ function App() {
         <p>Sistema de Gerenciamento de Consultas</p>
         <div className="header-user">
           <span>Conectada: {currentUser?.name || currentUser?.username}</span>
+          <button
+            className="btn btn-secondary"
+            type="button"
+            onClick={() => setShowChangePassword((prev) => !prev)}
+          >
+            {showChangePassword ? 'Fechar' : 'Alterar senha'}
+          </button>
           <button className="btn btn-secondary" onClick={handleLogout}>Sair</button>
         </div>
       </header>
@@ -291,8 +315,15 @@ function App() {
       </div>
 
       <main className="main-content">
+        {showChangePassword && (
+          <ChangePassword
+            onSuccess={handlePasswordChanged}
+            onCancel={() => setShowChangePassword(false)}
+          />
+        )}
         <AppointmentForm onAdd={addAppointment} selectedDate={selectedDate} />
         {isLoading && <div className="notice">Carregando dados da API...</div>}
+        {successMessage && <div className="notice notice-success">{successMessage}</div>}
         {errorMessage && <div className="notice notice-error">{errorMessage}</div>}
         <section className="financial-panel">
           <h2>Resumo Financeiro (MVP)</h2>

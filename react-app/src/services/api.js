@@ -84,6 +84,13 @@ export async function fetchCurrentUser() {
   return request("/auth/me");
 }
 
+export async function changePassword(currentPassword, newPassword) {
+  return request("/auth/password", {
+    method: "PUT",
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+}
+
 export async function syncR2Backup() {
   return request("/backup/sync", { method: "POST" });
 }
