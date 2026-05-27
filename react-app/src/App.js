@@ -138,7 +138,7 @@ function App() {
       const price = Number(appointment.price || 0);
       const deposit = appointment.chargeFirstSessionDeposit ? price * 0.5 : 0;
 
-      if (appointment.status === 'presente') {
+      if (appointment.status === 'presente' || appointment.status === 'agendada' || appointment.status === 'remarcada') {
         acc.expectedRevenue += price;
       }
       if (appointment.status === 'cancelada') {

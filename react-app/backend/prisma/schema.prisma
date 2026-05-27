@@ -3,35 +3,15 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
-
-enum ConsultationType {
-  psicoterapia
-  avaliacao
-  preco_antigo
-}
-
-enum AppointmentStatus {
-  agendada
-  confirmada
-  presente
-  falta
-  cancelada
-  remarcada
-}
-
-enum PaymentMethod {
-  dinheiro
-  cartao
-  pix
-}
-
-enum PaymentStatus {
-  pendente
-  pago
-  estornado
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Hash SHA-256
+  name      String
+  createdAt DateTime @default(now())
 }
 
 model Patient {
@@ -51,12 +31,12 @@ model Appointment {
   id                    String            @id @default(cuid())
   patientId             String
   patient               Patient           @relation(fields: [patientId], references: [id])
-  consultationType      ConsultationType
-  price                 Decimal           @db.Decimal(10, 2)
+  consultationType      String            // era enum ConsultationType
+  price                 Float
   startsAt              DateTime
   endsAt                DateTime
   durationMinutes       Int
-  status                AppointmentStatus @default(agendada)
+  status                String            @default("agendada") // era enum AppointmentStatus
   summary               String?
   chargeFirstDeposit    Boolean           @default(false)
   recurringWeekly       Boolean           @default(false)
@@ -85,9 +65,9 @@ model Payment {
   id               String        @id @default(cuid())
   appointmentId    String
   appointment      Appointment   @relation(fields: [appointmentId], references: [id])
-  amount           Decimal       @db.Decimal(10, 2)
-  method           PaymentMethod
-  status           PaymentStatus @default(pendente)
+  amount           Float
+  method           String        // era enum PaymentMethod
+  status           String        @default("pendente") // era enum PaymentStatus
   isDeposit        Boolean       @default(false)
   isCancellationFee Boolean      @default(false)
   dueAt            DateTime?
