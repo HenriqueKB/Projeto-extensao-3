@@ -3,7 +3,7 @@ import AppointmentCard from './AppointmentCard';
 import { format, startOfWeek, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
-const WeeklyView = ({ appointments, onDelete, onEdit, selectedDate }) => {
+const WeeklyView = ({ appointments, onDelete, onEdit, onCancel, selectedDate }) => {
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 0 });
   
   const getWeekDays = () => {
@@ -40,6 +40,7 @@ const WeeklyView = ({ appointments, onDelete, onEdit, selectedDate }) => {
                     appointment={apt}
                     onDelete={onDelete}
                     onEdit={onEdit}
+                    onCancel={onCancel}
                   />
                 ))
               ) : (

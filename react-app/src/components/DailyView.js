@@ -1,7 +1,10 @@
 import React from 'react';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 import AppointmentCard from './AppointmentCard';
 
-const DailyView = ({ appointments, onDelete, onEdit, selectedDate }) => {
+const DailyView = ({ appointments, onDelete, onEdit, onCancel, selectedDate }) => {
+  const dayLabel = format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
   const generateTimeSlots = () => {
     const slots = [];
     for (let hour = 0; hour < 24; hour++) {
@@ -32,7 +35,7 @@ const DailyView = ({ appointments, onDelete, onEdit, selectedDate }) => {
 
   return (
     <div>
-      <h2>Agenda de Hoje</h2>
+      <h2>Agenda — {dayLabel}</h2>
       <div className="schedule-grid">
         {timeSlots.map(time => (
           <React.Fragment key={time}>
@@ -45,6 +48,7 @@ const DailyView = ({ appointments, onDelete, onEdit, selectedDate }) => {
                     appointment={apt}
                     onDelete={onDelete}
                     onEdit={onEdit}
+                    onCancel={onCancel}
                   />
                 ))
               ) : (

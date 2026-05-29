@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { APPOINTMENT_STATUS, PAYMENT_METHODS } from "../constants";
 
-const EditAppointmentModal = ({ appointment, onClose, onSave }) => {
+const EditAppointmentModal = ({ appointment, onClose, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     date: appointment.date,
     startTime: appointment.startTime,
@@ -24,6 +24,20 @@ const EditAppointmentModal = ({ appointment, onClose, onSave }) => {
       durationMinutes: Number(formData.durationMinutes),
       price: Number(formData.price),
     });
+  };
+
+  const handleUnmark = () => {
+    if (!onCancel) {
+      return;
+    }
+    const confirmed = window.confirm(
+      `Desmarcar o paciente desta consulta (${appointment.date} às ${appointment.startTime})?`
+    );
+    if (!confirmed) {
+      return;
+    }
+    onCancel(appointment);
+    onClose();
   };
 
   return (
@@ -93,9 +107,19 @@ const EditAppointmentModal = ({ appointment, onClose, onSave }) => {
             <textarea id="edit-summary" name="summary" rows="4" value={formData.summary} onChange={handleChange} />
           </div>
 
-          <button type="submit" className="btn btn-primary">
-            Salvar alteracoes
-          </button>
+          <div className="modal-actions">
+            <button type="submit" className="btn btn-primary">
+              Salvar alteracoes
+            </button>
+            {appointment.status !== "cancelada" && onCancel && (
+              <button type="button" className="btn btn-warning" onClick={handleUnmark}>
+                Desmarcar paciente
+              </button>
+            )}
+            <button type="button" className="btn btn-secondary" onClick={onClose}>
+              Fechar
+            </button>
+          </div>
         </form>
       </div>
     </div>

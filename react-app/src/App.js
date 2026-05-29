@@ -3,12 +3,17 @@ import './App.css';
 import DailyView from './components/DailyView';
 import WeeklyView from './components/WeeklyView';
 import MonthlyView from './components/MonthlyView';
+import YearlyView from './components/YearlyView';
+import CalendarToolbar, {
+  filterAppointmentsInMonth,
+  filterAppointmentsInYear,
+} from './components/CalendarToolbar';
 import AppointmentForm from './components/AppointmentForm';
 import EditAppointmentModal from './components/EditAppointmentModal';
 import PatientList from './components/PatientList';
 import Login from './components/Login';
 import ChangePassword from './components/ChangePassword';
-import { format } from 'date-fns';
+import { format, startOfMonth } from 'date-fns';
 import {
   fetchPatients,
   createPatient,
@@ -158,6 +163,25 @@ function App() {
     }
   };
 
+  const cancelAppointment = async (appointment) => {
+    try {
+      setErrorMessage('');
+      await updateAppointmentById(appointment.id, {
+        date: appointment.date,
+        startTime: appointment.startTime || appointment.time,
+        durationMinutes: appointment.durationMinutes || appointment.duration,
+        status: 'cancelada',
+      });
+      await loadData();
+      if (appointment.patientId && historyByPatient[appointment.patientId]) {
+        await loadPatientHistory(appointment.patientId);
+      }
+      showSuccess('Paciente desmarcado com sucesso.');
+    } catch (error) {
+      setErrorMessage(error.message);
+    }
+  };
+
   const loadPatientHistory = async (patientId) => {
     try {
       setErrorMessage('');
@@ -239,33 +263,62 @@ function App() {
     { expectedRevenue: 0, depositTotal: 0, cancellationFees: 0 }
   );
 
+  const decoratedAppointments = appointments.map((appointment) =>
+    decorateAppointmentForView(appointment, patients)
+  );
+
+  const handleSelectMonthFromYear = (monthDate) => {
+    setSelectedDate(startOfMonth(monthDate));
+    setActiveView('monthly');
+  };
+
+  const handleSelectDayFromYear = (day) => {
+    setSelectedDate(day);
+    setActiveView('daily');
+  };
+
   const renderView = () => {
+    const sharedProps = {
+      onDelete: deleteAppointment,
+      onEdit: setEditingAppointment,
+      onCancel: cancelAppointment,
+      selectedDate,
+    };
+
     switch (activeView) {
       case 'daily':
-        return <DailyView 
-          appointments={getAppointmentsForDate(selectedDate)}
-          onDelete={deleteAppointment}
-          onEdit={setEditingAppointment}
-          selectedDate={selectedDate}
-        />;
+        return (
+          <DailyView
+            appointments={getAppointmentsForDate(selectedDate)}
+            {...sharedProps}
+          />
+        );
       case 'weekly':
-        return <WeeklyView 
-          appointments={appointments.map((appointment) => decorateAppointmentForView(appointment, patients))}
-          onDelete={deleteAppointment}
-          onEdit={setEditingAppointment}
-          selectedDate={selectedDate}
-        />;
+        return <WeeklyView appointments={decoratedAppointments} {...sharedProps} />;
       case 'monthly':
-        return <MonthlyView 
-          appointments={appointments.map((appointment) => decorateAppointmentForView(appointment, patients))}
-          onDelete={deleteAppointment}
-          onEdit={setEditingAppointment}
-          selectedDate={selectedDate}
-        />;
+        return <MonthlyView appointments={decoratedAppointments} {...sharedProps} />;
+      case 'yearly':
+        return (
+          <YearlyView
+            appointments={decoratedAppointments}
+            selectedDate={selectedDate}
+            onSelectMonth={handleSelectMonthFromYear}
+            onSelectDay={handleSelectDayFromYear}
+          />
+        );
       default:
         return null;
     }
   };
+
+  const periodAppointmentCount =
+    activeView === 'daily'
+      ? getAppointmentsForDate(selectedDate).length
+      : activeView === 'yearly'
+        ? filterAppointmentsInYear(decoratedAppointments, selectedDate).length
+        : activeView === 'monthly'
+          ? filterAppointmentsInMonth(decoratedAppointments, selectedDate).length
+          : decoratedAppointments.length;
 
   if (!authChecked) {
     return <div className="notice">Verificando sessao...</div>;
@@ -312,6 +365,12 @@ function App() {
         >
           Mensal
         </button>
+        <button
+          className={`view-tab ${activeView === 'yearly' ? 'active' : ''}`}
+          onClick={() => setActiveView('yearly')}
+        >
+          Anual
+        </button>
       </div>
 
       <main className="main-content">
@@ -350,7 +409,18 @@ function App() {
             </div>
           </div>
         </section>
-        <PatientList patients={patients} historyByPatient={historyByPatient} onLoadHistory={loadPatientHistory} />
+        <PatientList
+          patients={patients}
+          historyByPatient={historyByPatient}
+          onLoadHistory={loadPatientHistory}
+          onCancelAppointment={cancelAppointment}
+        />
+        <CalendarToolbar
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          activeView={activeView}
+          appointmentCount={periodAppointmentCount}
+        />
         {renderView()}
       </main>
       {editingAppointment && (
@@ -358,6 +428,7 @@ function App() {
           appointment={editingAppointment}
           onClose={() => setEditingAppointment(null)}
           onSave={(updates) => editAppointment(editingAppointment.id, updates)}
+          onCancel={cancelAppointment}
         />
       )}
     </div>

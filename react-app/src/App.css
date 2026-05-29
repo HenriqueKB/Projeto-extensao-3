@@ -12,7 +12,7 @@ body {
 }
 
 .App {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   background: white;
   border-radius: 15px;
@@ -181,6 +181,75 @@ body {
   border-radius: 6px;
   margin-bottom: 5px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.appointment-body {
+  padding-right: 4px;
+}
+
+.appointment-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.appointment-actions .btn {
+  font-size: 12px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.appointment-action-unmark {
+  flex: 1 1 auto;
+  min-width: 140px;
+}
+
+.appointment-unmarked-label {
+  flex: 1 1 auto;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.9;
+  align-self: center;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #333;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+}
+
+.btn-light {
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+}
+
+.btn-light:hover {
+  background: white;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+.btn-sm {
+  font-size: 12px;
+  padding: 4px 10px;
 }
 
 .appointment-time {
@@ -199,41 +268,222 @@ body {
   margin-top: 5px;
 }
 
-.delete-btn {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  background: rgba(255,255,255,0.3);
-  border: none;
-  color: white;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  cursor: pointer;
+.appointment--cancelled {
+  opacity: 0.75;
+  background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  text-transform: capitalize;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.status-cancelada {
+  background: rgba(220, 53, 69, 0.35);
+}
+
+.modal-actions {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.calendar-toolbar {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.calendar-toolbar-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.calendar-toolbar-period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.calendar-period-title {
+  color: #667eea;
+  font-size: 1.35rem;
+  text-transform: capitalize;
+}
+
+.calendar-period-hint {
+  color: #666;
+  font-size: 14px;
+}
+
+.calendar-year-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-year-picker input {
+  width: 100px;
+  padding: 8px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
   font-size: 16px;
-  line-height: 1;
-  transition: background 0.3s ease;
 }
 
-.delete-btn:hover {
-  background: rgba(255,255,255,0.5);
+.calendar-quick-months {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.edit-btn {
-  position: absolute;
-  top: 5px;
-  right: 40px;
-  background: rgba(255,255,255,0.3);
-  border: none;
-  color: white;
+.calendar-month-chip {
+  border: 1px solid #dee2e6;
+  background: white;
   border-radius: 999px;
+  padding: 6px 12px;
   cursor: pointer;
-  font-size: 12px;
-  padding: 4px 8px;
+  font-size: 13px;
+  text-transform: capitalize;
 }
 
-.edit-btn:hover {
-  background: rgba(255,255,255,0.5);
+.calendar-month-chip.active {
+  border-color: #667eea;
+  background: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+.calendar-month-chip.today-month:not(.active) {
+  border-color: #764ba2;
+}
+
+.yearly-view h2 {
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.yearly-view-hint {
+  color: #666;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.year-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.year-month-card {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+.year-month-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.year-month-card-header h3 {
+  color: #667eea;
+  text-transform: capitalize;
+  font-size: 1.1rem;
+}
+
+.year-month-count {
+  font-size: 12px;
+  color: #666;
+}
+
+.year-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 10px;
+}
+
+.year-mini-weekday {
+  font-size: 10px;
+  text-align: center;
+  color: #888;
+  font-weight: 600;
+}
+
+.year-mini-day {
+  border: none;
+  background: white;
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 4px 0;
+  cursor: pointer;
+  color: #333;
+}
+
+.year-mini-day:hover {
+  background: #e7f1ff;
+}
+
+.year-mini-day--empty {
+  background: transparent;
+  cursor: default;
+}
+
+.year-mini-day--busy {
+  background: #667eea;
+  color: white;
+  font-weight: 600;
+}
+
+.year-mini-day--cancelled-only {
+  background: #adb5bd;
+  color: white;
+}
+
+.year-mini-day--mixed {
+  background: linear-gradient(135deg, #667eea 50%, #adb5bd 50%);
+  color: white;
+}
+
+.year-mini-day--selected {
+  outline: 2px solid #764ba2;
+  outline-offset: 1px;
+}
+
+.year-month-summary {
+  list-style: none;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+.year-month-summary li {
+  padding: 2px 0;
+}
+
+.year-month-more {
+  font-style: italic;
+  color: #888;
+}
+
+.year-month-open {
+  width: 100%;
 }
 
 .week-grid, .month-grid {
@@ -393,6 +643,20 @@ body {
   font-size: 14px;
   color: #555;
   padding: 4px 0;
+}
+
+.history-item-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.history-item-row:last-child {
+  border-bottom: none;
 }
 
 .day-card {

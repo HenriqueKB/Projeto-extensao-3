@@ -3,25 +3,42 @@ const { S3Client, GetObjectCommand, PutObjectCommand } = require("@aws-sdk/clien
 const fs = require("fs");
 const path = require("path");
 
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME;
-
-const s3 = new S3Client({
-  region: "auto",
-  endpoint: process.env.R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-  },
-});
-
 const dbPath = path.join(__dirname, "../prisma/dev.db");
 
+function isR2Configured() {
+  return Boolean(
+    process.env.R2_ENDPOINT &&
+      process.env.R2_ACCESS_KEY_ID &&
+      process.env.R2_SECRET_ACCESS_KEY &&
+      process.env.R2_BUCKET_NAME
+  );
+}
+
+function createS3Client() {
+  return new S3Client({
+    region: "auto",
+    endpoint: process.env.R2_ENDPOINT,
+    credentials: {
+      accessKeyId: process.env.R2_ACCESS_KEY_ID,
+      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+    },
+  });
+}
+
 async function downloadDatabase() {
+  if (!isR2Configured()) {
+    console.log("ℹ️ R2 não configurado — usando banco local (prisma/dev.db).");
+    return;
+  }
+
+  const s3 = createS3Client();
+  const bucket = process.env.R2_BUCKET_NAME;
+
   console.log("Iniciando download do banco do R2...");
   try {
     const data = await s3.send(
       new GetObjectCommand({
-        Bucket: R2_BUCKET_NAME,
+        Bucket: bucket,
         Key: "dev.db",
       })
     );
@@ -41,6 +58,13 @@ async function downloadDatabase() {
 }
 
 async function uploadDatabase() {
+  if (!isR2Configured()) {
+    return;
+  }
+
+  const s3 = createS3Client();
+  const bucket = process.env.R2_BUCKET_NAME;
+
   console.log("Realizando backup do banco para o R2...");
   try {
     // É importante esperar um momentinho pro SQLite dar flush se não usar modo WAL.
@@ -48,7 +72,7 @@ async function uploadDatabase() {
     const fileStream = fs.createReadStream(dbPath);
     await s3.send(
       new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
+        Bucket: bucket,
         Key: "dev.db",
         Body: fileStream,
       })
@@ -59,4 +83,4 @@ async function uploadDatabase() {
   }
 }
 
-module.exports = { downloadDatabase, uploadDatabase };
+module.exports = { downloadDatabase, uploadDatabase, isR2Configured };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { format } from "date-fns";
 
-const PatientList = ({ patients, historyByPatient, onLoadHistory }) => {
+const PatientList = ({ patients, historyByPatient, onLoadHistory, onCancelAppointment }) => {
   const [expandedPatientId, setExpandedPatientId] = useState("");
 
   const handleToggle = async (patientId) => {
@@ -14,6 +14,22 @@ const PatientList = ({ patients, historyByPatient, onLoadHistory }) => {
     if (!historyByPatient[patientId]) {
       await onLoadHistory(patientId);
     }
+  };
+
+  const handleUnmark = async (appointment) => {
+    if (!onCancelAppointment) {
+      return;
+    }
+    const confirmed = window.confirm(
+      `Desmarcar ${appointment.patientName || "paciente"} da consulta em ${appointment.date} às ${appointment.startTime}?`
+    );
+    if (!confirmed) {
+      return;
+    }
+    await onCancelAppointment({
+      ...appointment,
+      patientId: appointment.patientId || expandedPatientId,
+    });
   };
 
   return (
@@ -42,12 +58,32 @@ const PatientList = ({ patients, historyByPatient, onLoadHistory }) => {
                     {history.length === 0 ? (
                       <div className="empty-slot">Sem consultas registradas.</div>
                     ) : (
-                      history.map((appointment) => (
-                        <div key={appointment.id} className="history-item">
-                          {format(new Date(`${appointment.date}T00:00:00`), "dd/MM/yyyy")} - {appointment.startTime} |{" "}
-                          {appointment.status} | R$ {Number(appointment.price).toFixed(2)}
-                        </div>
-                      ))
+                      history.map((appointment) => {
+                        const isCancelled = appointment.status === "cancelada";
+                        return (
+                          <div key={appointment.id} className="history-item history-item-row">
+                            <div>
+                              {format(new Date(`${appointment.date}T00:00:00`), "dd/MM/yyyy")} -{" "}
+                              {appointment.startTime} |{" "}
+                              <span className={`status-badge status-${appointment.status}`}>
+                                {appointment.status}
+                              </span>{" "}
+                              | R$ {Number(appointment.price).toFixed(2)}
+                            </div>
+                            {!isCancelled && onCancelAppointment && (
+                              <button
+                                type="button"
+                                className="btn btn-warning btn-sm"
+                                onClick={() =>
+                                  handleUnmark({ ...appointment, patientId: patient.id, patientName: patient.name })
+                                }
+                              >
+                                Desmarcar paciente
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })
                     )}
                   </div>
                 )}

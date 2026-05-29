@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { CONSULTATION_TYPES, PAYMENT_METHODS, APPOINTMENT_STATUS } from '../constants';
 
@@ -17,6 +17,13 @@ const AppointmentForm = ({ onAdd, selectedDate }) => {
     isRecurringWeekly: false,
     patientRecord: '',
   });
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      date: format(selectedDate, 'yyyy-MM-dd'),
+    }));
+  }, [selectedDate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
