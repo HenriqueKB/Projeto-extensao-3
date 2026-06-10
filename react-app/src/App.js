@@ -124,7 +124,7 @@ function App() {
   }
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={process.env.PUBLIC_URL}>
       {successMessage && <div className="notice notice-success global-notice-bar">{successMessage}</div>}
       {errorMessage && <div className="notice notice-error global-notice-bar">{errorMessage}</div>}
 
