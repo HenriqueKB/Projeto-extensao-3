@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.css": "/psicologa.agenda/static/css/main.4c78ea17.css",
-    "main.js": "/psicologa.agenda/static/js/main.9953b857.js",
-    "index.html": "/psicologa.agenda/index.html",
-    "main.4c78ea17.css.map": "/psicologa.agenda/static/css/main.4c78ea17.css.map",
-    "main.9953b857.js.map": "/psicologa.agenda/static/js/main.9953b857.js.map"
+    "main.css": "/Projeto-extensao-3/static/css/main.4c78ea17.css",
+    "main.js": "/Projeto-extensao-3/static/js/main.9953b857.js",
+    "index.html": "/Projeto-extensao-3/index.html",
+    "main.4c78ea17.css.map": "/Projeto-extensao-3/static/css/main.4c78ea17.css.map",
+    "main.9953b857.js.map": "/Projeto-extensao-3/static/js/main.9953b857.js.map"
   },
   "entrypoints": [
     "static/css/main.4c78ea17.css",
