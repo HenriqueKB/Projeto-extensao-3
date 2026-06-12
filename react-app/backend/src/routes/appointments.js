@@ -56,6 +56,10 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "Campos obrigatorios ausentes." });
   }
 
+  if (status === "cancelada" || status === "falta") {
+    return res.status(400).json({ error: `Não é possível criar uma nova consulta com o status '${status}'.` });
+  }
+
   try {
     const startsAt = new Date(`${date}T${startTime}:00Z`);
     const endsAt = new Date(startsAt.getTime() + Number(durationMinutes) * 60000);

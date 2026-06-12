@@ -219,7 +219,7 @@ const AppointmentForm = ({ onAdd, selectedDate, patients, onPatientCreated }) =>
               value={formData.status}
               onChange={handleChange}
             >
-              {APPOINTMENT_STATUS.map((status) => (
+              {APPOINTMENT_STATUS.filter(s => s.value !== 'cancelada' && s.value !== 'falta').map((status) => (
                 <option key={status.value} value={status.value}>
                   {status.label}
                 </option>
